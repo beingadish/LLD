@@ -25,8 +25,9 @@ public class SlidingWindow {
         if (requestTimes.size() < maxRequestAllowed) {
             requestTimes.addLast(now);
             return true;
+        } else {
+            requestTimes.addLast(now);
+            return false;
         }
-
-        return false;
     }
 }
