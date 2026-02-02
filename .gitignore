@@ -1,0 +1,43 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# Java build outputs
+**/target/
+**/build/
+**/out/
+**/bin/
+**/dist/
+
+# Gradle
+.gradle/
+
+# Maven
+# (keep wrapper scripts/jars tracked; add project-specific dirs here if needed)
+
+# Logs and reports
+*.log
+hs_err_pid*
+replay_pid*
+.waylog
+
+# Coverage
+*.exec
+jacoco*.xml
+
+# Local environment/config
+.env
+*.local
+
+# IntelliJ/JetBrains project metadata
+#.idea/modules.xml
+#.idea/libraries/
