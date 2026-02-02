@@ -4,6 +4,7 @@ import com.beingadish.ratelimiters.RateLimiter;
 import com.beingadish.ratelimiters.RateLimiterFactory;
 import com.beingadish.ratelimiters.commons.configurations.FixedWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.LeakyBucketConfig;
+import com.beingadish.ratelimiters.commons.configurations.SlidingWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.TokenBucketConfig;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class App {
         RateLimiter tokenBucketLimiter = rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L));
         RateLimiter leakyBucketLimiter = rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L));
         RateLimiter fixedWindowLimiter = rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5));
+        RateLimiter slidingWindowLimiter = rateLimiterFactory.getRateLimiter(new SlidingWindowConfig(5, 1000L));
 
         List<String> requests = List.of("user1", "user2", "user2", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user1", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user2", "user2", "user2", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2");
 
@@ -25,6 +27,8 @@ public class App {
         simulateRequestFlow(leakyBucketLimiter, requests);
         System.out.println("==================== Fixed Window ===================");
         simulateRequestFlow(fixedWindowLimiter, requests);
+        System.out.println("==================== Sliding Window ===================");
+        simulateRequestFlow(slidingWindowLimiter, requests);
     }
 
     private static void simulateRequestFlow(RateLimiter rateLimiter, List<String> requests) throws InterruptedException {
