@@ -2,6 +2,7 @@ package com.beingadish;
 
 import com.beingadish.ratelimiters.RateLimiter;
 import com.beingadish.ratelimiters.RateLimiterFactory;
+import com.beingadish.ratelimiters.commons.configurations.FixedWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.LeakyBucketConfig;
 import com.beingadish.ratelimiters.commons.configurations.TokenBucketConfig;
 
@@ -14,16 +15,25 @@ public class App {
         RateLimiterFactory rateLimiterFactory = new RateLimiterFactory();
         RateLimiter tokenBucketLimiter = rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L));
         RateLimiter leakyBucketLimiter = rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L));
+        RateLimiter fixedWindowLimiter = rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5));
 
         List<String> requests = List.of("user1", "user2", "user2", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user1", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user2", "user2", "user2", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2");
-        double beforeTime = System.nanoTime();
-        ConcurrentHashMap<String, Integer> statsAccept = new ConcurrentHashMap<>();
-        ConcurrentHashMap<String, Integer> statsReject = new ConcurrentHashMap<>();
 
         System.out.println("==================== Token Bucket ===================");
+        simulateRequestFlow(tokenBucketLimiter, requests);
+        System.out.println("==================== Leaky Bucket ===================");
+        simulateRequestFlow(leakyBucketLimiter, requests);
+        System.out.println("==================== Fixed Window ===================");
+        simulateRequestFlow(fixedWindowLimiter, requests);
+    }
+
+    private static void simulateRequestFlow(RateLimiter rateLimiter, List<String> requests) throws InterruptedException {
+        ConcurrentHashMap<String, Integer> statsAccept = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, Integer> statsReject = new ConcurrentHashMap<>();
+        double beforeTime = System.nanoTime();
         for (String request : requests) {
             Thread.sleep(10);
-            if (tokenBucketLimiter.isAllowed(request)) {
+            if (rateLimiter.isAllowed(request)) {
                 statsAccept.put(request, statsAccept.getOrDefault(request, 0) + 1);
                 System.out.print(request + " [ALLOWED] - ");
             } else {
@@ -32,35 +42,16 @@ public class App {
             }
             System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + "Seconds");
         }
-
-        print(statsAccept, statsReject);
-
-        statsAccept.clear();
-        statsReject.clear();
-        System.out.println("==================== Leaky Bucket ===================");
-
-        for (String request : requests) {
-            Thread.sleep(10);
-            if (leakyBucketLimiter.isAllowed(request)) {
-                statsAccept.put(request, statsAccept.getOrDefault(request, 0) + 1);
-                System.out.print(request + " is allowed - ");
-            } else {
-                statsReject.put(request, statsReject.getOrDefault(request, 0) + 1);
-                System.out.print(request + " is disallowed - ");
-            }
-            System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + "Seconds");
-        }
-
         print(statsAccept, statsReject);
     }
 
     private static void print(ConcurrentHashMap<String, Integer> statsAccept, ConcurrentHashMap<String, Integer> statsReject) {
-        System.out.println("=================== STATS - Accept ===================");
+        System.out.println("=================== STATS - [Accept] ===================");
         for (String request : statsAccept.keySet()) {
             System.out.println(request + " : " + statsAccept.get(request));
         }
 
-        System.out.println("=================== STATS - Reject ===================");
+        System.out.println("=================== STATS - [Reject] ===================");
         for (String request : statsReject.keySet()) {
             System.out.println(request + " : " + statsReject.get(request));
         }
