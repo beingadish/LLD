@@ -33,15 +33,7 @@ public class App {
             System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + "Seconds");
         }
 
-        System.out.println("=================== STATS - Accept ===================");
-        for (String request : statsAccept.keySet()) {
-            System.out.println(request + " : " + statsAccept.get(request));
-        }
-
-        System.out.println("=================== STATS - Reject ===================");
-        for (String request : statsReject.keySet()) {
-            System.out.println(request + " : " + statsReject.get(request));
-        }
+        print(statsAccept, statsReject);
 
         statsAccept.clear();
         statsReject.clear();
@@ -59,6 +51,10 @@ public class App {
             System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + "Seconds");
         }
 
+        print(statsAccept, statsReject);
+    }
+
+    private static void print(ConcurrentHashMap<String, Integer> statsAccept, ConcurrentHashMap<String, Integer> statsReject) {
         System.out.println("=================== STATS - Accept ===================");
         for (String request : statsAccept.keySet()) {
             System.out.println(request + " : " + statsAccept.get(request));

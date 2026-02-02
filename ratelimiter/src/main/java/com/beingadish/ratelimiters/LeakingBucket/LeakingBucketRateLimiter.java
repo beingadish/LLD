@@ -8,7 +8,7 @@ public class LeakingBucketRateLimiter extends RateLimiter {
     long capacity;
     double outflowRate;
 
-    ConcurrentHashMap<String, LeakingBucket> usageQueue = new ConcurrentHashMap<String, LeakingBucket>();
+    ConcurrentHashMap<String, LeakingBucket> usageQueue = new ConcurrentHashMap<>();
 
     public LeakingBucketRateLimiter(long capacity, double outflowRate) {
         this.capacity = capacity;

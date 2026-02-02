@@ -13,7 +13,7 @@ public class TokenBucketRateLimiter extends RateLimiter {
         this.capacity = capacity;
     }
 
-    ConcurrentHashMap<String, TokenBucket> userBuckets = new ConcurrentHashMap<String, TokenBucket>();
+    ConcurrentHashMap<String, TokenBucket> userBuckets = new ConcurrentHashMap<>();
 
     @Override
     public boolean isAllowed(String userId) {
