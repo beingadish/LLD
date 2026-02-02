@@ -1,7 +1,7 @@
 package com.beingadish.ratelimiters.commons.configurations;
 
 public record SlidingWindowConfig(Integer maxRequestsAllowed,
-                                        Long windowSizeInMs) implements RateLimiterConfigurations {
+                                  Long windowSizeInMs) implements RateLimiterConfigurations {
     public SlidingWindowConfig {
         if (maxRequestsAllowed == null) {
             throw new NullPointerException("maxRequestsAllowed cannot be null");

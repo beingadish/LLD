@@ -8,56 +8,85 @@ import com.beingadish.ratelimiters.commons.configurations.SlidingWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.TokenBucketConfig;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A demonstration of different rate limiter implementations.
+ */
 public class App {
+
+    /**
+     * The main entry point for the rate limiter demonstration.
+     *
+     * @param args Command line arguments (not used).
+     * @throws InterruptedException if the thread is interrupted while sleeping.
+     */
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("Rate Limiter");
+        System.out.println("Rate Limiter Demonstration");
+
         RateLimiterFactory rateLimiterFactory = new RateLimiterFactory();
-        RateLimiter tokenBucketLimiter = rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L));
-        RateLimiter leakyBucketLimiter = rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L));
-        RateLimiter fixedWindowLimiter = rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5));
-        RateLimiter slidingWindowLimiter = rateLimiterFactory.getRateLimiter(new SlidingWindowConfig(5, 1000L));
+        List<String> requests = getRequests();
 
-        List<String> requests = List.of("user1", "user2", "user2", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user1", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user2", "user2", "user2", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2");
+        // Create different types of rate limiters
+        Map<String, RateLimiter> rateLimiters = Map.of("Token Bucket", rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L)), "Leaky Bucket", rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L)), "Fixed Window", rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5)), "Sliding Window", rateLimiterFactory.getRateLimiter(new SlidingWindowConfig(5, 1000L)));
 
-        System.out.println("==================== Token Bucket ===================");
-        simulateRequestFlow(tokenBucketLimiter, requests);
-        System.out.println("==================== Leaky Bucket ===================");
-        simulateRequestFlow(leakyBucketLimiter, requests);
-        System.out.println("==================== Fixed Window ===================");
-        simulateRequestFlow(fixedWindowLimiter, requests);
-        System.out.println("==================== Sliding Window ===================");
-        simulateRequestFlow(slidingWindowLimiter, requests);
+        // Simulate request flow for each rate limiter
+        for (Map.Entry<String, RateLimiter> entry : rateLimiters.entrySet()) {
+            System.out.println("==================== " + entry.getKey() + " ===================");
+            simulateRequestFlow(entry.getValue(), requests);
+        }
     }
 
+    /**
+     * Simulates a flow of requests against a given rate limiter and prints the statistics.
+     *
+     * @param rateLimiter The rate limiter to test.
+     * @param requests    The list of requests to simulate.
+     * @throws InterruptedException if the thread is interrupted while sleeping.
+     */
     private static void simulateRequestFlow(RateLimiter rateLimiter, List<String> requests) throws InterruptedException {
         ConcurrentHashMap<String, Integer> statsAccept = new ConcurrentHashMap<>();
         ConcurrentHashMap<String, Integer> statsReject = new ConcurrentHashMap<>();
         double beforeTime = System.nanoTime();
+
         for (String request : requests) {
-            Thread.sleep(10);
+            Thread.sleep(10); // Simulate a small delay between requests
             if (rateLimiter.isAllowed(request)) {
-                statsAccept.put(request, statsAccept.getOrDefault(request, 0) + 1);
-                System.out.print(request + " [ALLOWED] - ");
+                statsAccept.compute(request, (k, v) -> (v == null) ? 1 : v + 1);
+                // System.out.print(request + " [ALLOWED] - "); // Uncomment to see individual request status
             } else {
-                statsReject.put(request, statsReject.getOrDefault(request, 0) + 1);
-                System.out.print(request + " [NOT ALLOWED] - ");
+                statsReject.compute(request, (k, v) -> (v == null) ? 1 : v + 1);
+                // System.out.print(request + " [NOT ALLOWED] - "); // Uncomment to see individual request status
             }
-            System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + "Seconds");
+            // System.out.println("Current time : " + (System.nanoTime() - beforeTime) / 1_000_000_000.0 + " Seconds");
         }
-        print(statsAccept, statsReject);
+        double totalTime = (System.nanoTime() - beforeTime) / 1_000_000_000.0;
+        System.out.printf("Total simulation time: %.2f seconds%n", totalTime);
+        printStats(statsAccept, statsReject);
     }
 
-    private static void print(ConcurrentHashMap<String, Integer> statsAccept, ConcurrentHashMap<String, Integer> statsReject) {
-        System.out.println("=================== STATS - [Accept] ===================");
-        for (String request : statsAccept.keySet()) {
-            System.out.println(request + " : " + statsAccept.get(request));
-        }
+    /**
+     * Prints the statistics of accepted and rejected requests.
+     *
+     * @param statsAccept A map containing the count of accepted requests per user.
+     * @param statsReject A map containing the count of rejected requests per user.
+     */
+    private static void printStats(Map<String, Integer> statsAccept, Map<String, Integer> statsReject) {
+        System.out.println("--- STATS [Accepted] ---");
+        statsAccept.forEach((user, count) -> System.out.printf("%s: %d%n", user, count));
 
-        System.out.println("=================== STATS - [Reject] ===================");
-        for (String request : statsReject.keySet()) {
-            System.out.println(request + " : " + statsReject.get(request));
-        }
+        System.out.println("--- STATS [Rejected] ---");
+        statsReject.forEach((user, count) -> System.out.printf("%s: %d%n", user, count));
+        System.out.println();
+    }
+
+    /**
+     * Generates a list of sample requests.
+     *
+     * @return A list of user IDs representing requests.
+     */
+    private static List<String> getRequests() {
+        return List.of("user1", "user2", "user2", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user1", "user1", "user1", "user1", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user1", "user1", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user1", "user1", "user2", "user2", "user2", "user1", "user1", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user3", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2", "user2");
     }
 }
