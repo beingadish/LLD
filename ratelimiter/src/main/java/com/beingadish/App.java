@@ -4,6 +4,7 @@ import com.beingadish.ratelimiters.RateLimiter;
 import com.beingadish.ratelimiters.RateLimiterFactory;
 import com.beingadish.ratelimiters.commons.configurations.FixedWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.LeakyBucketConfig;
+import com.beingadish.ratelimiters.commons.configurations.SlidingWindowCounterConfig;
 import com.beingadish.ratelimiters.commons.configurations.SlidingWindowConfig;
 import com.beingadish.ratelimiters.commons.configurations.TokenBucketConfig;
 
@@ -29,7 +30,13 @@ public class App {
         List<String> requests = getRequests();
 
         // Create different types of rate limiters
-        Map<String, RateLimiter> rateLimiters = Map.of("Token Bucket", rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L)), "Leaky Bucket", rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L)), "Fixed Window", rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5)), "Sliding Window", rateLimiterFactory.getRateLimiter(new SlidingWindowConfig(5, 1000L)));
+        Map<String, RateLimiter> rateLimiters = Map.of(
+                "Token Bucket", rateLimiterFactory.getRateLimiter(new TokenBucketConfig(4L, 2L)),
+                "Leaky Bucket", rateLimiterFactory.getRateLimiter(new LeakyBucketConfig(6L, 3L)),
+                "Fixed Window", rateLimiterFactory.getRateLimiter(new FixedWindowConfig(1000L, 5)),
+                "Sliding Window Log", rateLimiterFactory.getRateLimiter(new SlidingWindowConfig(5, 1000L)),
+                "Sliding Window Counter", rateLimiterFactory.getRateLimiter(new SlidingWindowCounterConfig(5, 1000L))
+        );
 
         // Simulate request flow for each rate limiter
         for (Map.Entry<String, RateLimiter> entry : rateLimiters.entrySet()) {

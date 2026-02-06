@@ -8,7 +8,7 @@ public class SlidingWindowRateLimiter extends RateLimiter {
 
     private final int maxRequestsAllowed;
     private final long windowSizeInMs;
-    ConcurrentHashMap<String, SlidingWindow> userWindows = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SlidingWindow> userWindows = new ConcurrentHashMap<>();
 
     public SlidingWindowRateLimiter(Integer maxRequestsAllowed, Long windowSizeInMs) {
         this.maxRequestsAllowed = maxRequestsAllowed;

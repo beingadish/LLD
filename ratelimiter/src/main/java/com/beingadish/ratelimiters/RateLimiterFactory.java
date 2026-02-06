@@ -2,6 +2,7 @@ package com.beingadish.ratelimiters;
 
 import com.beingadish.ratelimiters.FixedWindow.FixedWindowRateLimiter;
 import com.beingadish.ratelimiters.LeakingBucket.LeakingBucketRateLimiter;
+import com.beingadish.ratelimiters.SlidingWindowCounter.SlidingWindowCounterRateLimiter;
 import com.beingadish.ratelimiters.SlidingWindowLog.SlidingWindowRateLimiter;
 import com.beingadish.ratelimiters.TokenBucket.TokenBucketRateLimiter;
 import com.beingadish.ratelimiters.commons.configurations.*;
@@ -20,8 +21,12 @@ public class RateLimiterFactory {
             return new FixedWindowRateLimiter(windowSizeInMs, allowedRequests);
         }
 
-        if (config instanceof SlidingWindowConfig(var windowSizeInMs, var allowedRequestsPerSecond)) {
-            return new SlidingWindowRateLimiter(windowSizeInMs, allowedRequestsPerSecond);
+        if (config instanceof SlidingWindowConfig(var maxRequestsAllowed, var windowSizeInMs)) {
+            return new SlidingWindowRateLimiter(maxRequestsAllowed, windowSizeInMs);
+        }
+
+        if (config instanceof SlidingWindowCounterConfig(var maxRequestsAllowed, var windowSizeInMs)) {
+            return new SlidingWindowCounterRateLimiter(maxRequestsAllowed, windowSizeInMs);
         }
 
         throw new IllegalArgumentException("Unsupported RateLimiter configuration");

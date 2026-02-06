@@ -81,7 +81,7 @@ For learners, here is a suggested reading order:
     * **Token Bucket**: Next, read `TokenBucketRateLimiter.java` and `TokenBucket.java`. This introduces the concept of stateful objects that manage tokens and refill rates.
     * **Leaky Bucket**: Examine `LeakingBucketRateLimiter.java` and `LeakingBucket.java`. This shows a queue-based approach to smoothing out request rates.
     * **Sliding Window Log**: Read `SlidingWindowRateLimiter.java`. This demonstrates a more accurate but memory-intensive approach using timestamps.
-    * **Sliding Window Counter**: This algorithm is not yet implemented but would be the final step, combining concepts from the Fixed Window and Sliding Window Log.
+    * **Sliding Window Counter**: Read `SlidingWindowCounterRateLimiter.java` and `SlidingWindowCounter.java` to see a practical hybrid of fixed-window counting and sliding-window weighting.
 
 3. **Review the Configurations**:
     * Look at the classes in the `configurations` package. Notice how they are simple data holders that decouple the algorithm's parameters from its logic.
