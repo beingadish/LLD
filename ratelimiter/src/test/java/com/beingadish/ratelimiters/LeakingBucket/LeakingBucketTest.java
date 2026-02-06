@@ -23,7 +23,7 @@ public class LeakingBucketTest extends TestCase {
         assertTrue(bucket.tryFilling());
         assertFalse(bucket.tryFilling());
 
-        timeSupplier.setCurrentTime(1_000_000_000L);
+        timeSupplier.setCurrentTime();
         assertTrue(bucket.tryFilling());
         assertTrue(bucket.tryFilling());
         assertFalse(bucket.tryFilling());
@@ -36,8 +36,8 @@ public class LeakingBucketTest extends TestCase {
             this.currentTime = currentTime;
         }
 
-        private void setCurrentTime(long currentTime) {
-            this.currentTime = currentTime;
+        private void setCurrentTime() {
+            this.currentTime = 1000000000L;
         }
 
         @Override

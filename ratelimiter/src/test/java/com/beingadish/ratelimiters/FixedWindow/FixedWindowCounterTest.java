@@ -22,7 +22,7 @@ public class FixedWindowCounterTest extends TestCase {
         assertTrue(counter.allowRequest());
         assertFalse(counter.allowRequest());
 
-        timeSupplier.setCurrentTime(2_001L);
+        timeSupplier.setCurrentTime();
         assertTrue(counter.allowRequest());
     }
 
@@ -33,8 +33,8 @@ public class FixedWindowCounterTest extends TestCase {
             this.currentTime = currentTime;
         }
 
-        private void setCurrentTime(long currentTime) {
-            this.currentTime = currentTime;
+        private void setCurrentTime() {
+            this.currentTime = 2001L;
         }
 
         @Override
