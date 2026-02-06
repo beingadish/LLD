@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * This implementation is thread-safe.
  */
 public class TokenBucketRateLimiter extends RateLimiter {
-    long capacity;
-    long refillRate;
+    private final long capacity;
+    private final long refillRate;
 
     /**
      * Constructs a new TokenBucketRateLimiter.
@@ -23,7 +23,7 @@ public class TokenBucketRateLimiter extends RateLimiter {
         this.capacity = capacity;
     }
 
-    ConcurrentHashMap<String, TokenBucket> userBuckets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, TokenBucket> userBuckets = new ConcurrentHashMap<>();
 
     /**
      * Checks if a request is allowed for a given user.

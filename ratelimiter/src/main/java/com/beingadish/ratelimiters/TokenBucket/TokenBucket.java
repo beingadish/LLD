@@ -1,15 +1,18 @@
 package com.beingadish.ratelimiters.TokenBucket;
 
+import java.util.function.LongSupplier;
+
 /**
  * A token bucket for rate limiting.
  * This class is not thread-safe if used for multiple users in a concurrent environment.
  * It is intended to be used as a state for a single user within a thread-safe rate limiter implementation.
  */
 public class TokenBucket {
-    double capacity;
-    double tokens;
-    double refillRate;
-    long lastRefillTimestamp;
+    private final double capacity;
+    private final double refillRate;
+    private final LongSupplier currentTimeSupplier;
+    private double tokens;
+    private long lastRefillTimestamp;
 
     /**
      * Constructs a new TokenBucket.
@@ -18,17 +21,22 @@ public class TokenBucket {
      * @param refillRate The rate at which tokens are added to the bucket per second.
      */
     public TokenBucket(long capacity, long refillRate) {
+        this(capacity, refillRate, System::nanoTime);
+    }
+
+    TokenBucket(long capacity, long refillRate, LongSupplier currentTimeSupplier) {
         this.capacity = capacity;
         this.refillRate = refillRate;
+        this.currentTimeSupplier = currentTimeSupplier;
         this.tokens = capacity;
-        this.lastRefillTimestamp = System.nanoTime();
+        this.lastRefillTimestamp = currentTimeSupplier.getAsLong();
     }
 
     /**
      * Refills the bucket with tokens based on the elapsed time since the last refill.
      */
-    public void refill() {
-        long now = System.nanoTime();
+    private void refill() {
+        long now = currentTimeSupplier.getAsLong();
         double seconds = (double) (now - lastRefillTimestamp) / 1_000_000_000;
         double tokensToAdd = seconds * refillRate;
         if (tokensToAdd > 0.0) {

@@ -1,5 +1,7 @@
 package com.beingadish.ratelimiters.FixedWindow;
 
+import java.util.function.LongSupplier;
+
 /**
  * A simple fixed window counter for rate limiting.
  * This class is not thread-safe if used for multiple users in a concurrent environment.
@@ -9,6 +11,7 @@ public class FixedWindowCounter {
 
     private final long windowSizeInMillis;
     private final long maxRequests;
+    private final LongSupplier currentTimeSupplier;
 
     private long windowStart;
     private long requestCount;
@@ -20,9 +23,14 @@ public class FixedWindowCounter {
      * @param maxRequests        The maximum number of requests allowed in a window.
      */
     public FixedWindowCounter(long windowSizeInMillis, long maxRequests) {
+        this(windowSizeInMillis, maxRequests, System::currentTimeMillis);
+    }
+
+    FixedWindowCounter(long windowSizeInMillis, long maxRequests, LongSupplier currentTimeSupplier) {
         this.windowSizeInMillis = windowSizeInMillis;
         this.maxRequests = maxRequests;
-        this.windowStart = System.currentTimeMillis();
+        this.currentTimeSupplier = currentTimeSupplier;
+        this.windowStart = currentTimeSupplier.getAsLong();
         this.requestCount = 0;
     }
 
@@ -33,7 +41,7 @@ public class FixedWindowCounter {
      * @return {@code true} if the request is allowed, {@code false} otherwise.
      */
     public synchronized boolean allowRequest() {
-        long now = System.currentTimeMillis();
+        long now = currentTimeSupplier.getAsLong();
         if (now - windowStart >= windowSizeInMillis) {
             requestCount = 0;
             windowStart = now;

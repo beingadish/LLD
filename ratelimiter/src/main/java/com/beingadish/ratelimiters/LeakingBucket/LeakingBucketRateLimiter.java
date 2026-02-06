@@ -9,10 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * This implementation is thread-safe.
  */
 public class LeakingBucketRateLimiter extends RateLimiter {
-    long capacity;
-    double outflowRate;
+    private final long capacity;
+    private final double outflowRate;
 
-    ConcurrentHashMap<String, LeakingBucket> usageQueue = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, LeakingBucket> usageQueue = new ConcurrentHashMap<>();
 
     /**
      * Constructs a new LeakingBucketRateLimiter.
