@@ -1,5 +1,17 @@
 import system.ConsistentHashingSystem;
+import java.util.Random;
 
+/**
+ * This file contains the main entry point for a simulation of the consistent hashing system.
+ * It demonstrates request distribution, server load balancing, and the effects of server addition and removal.
+ *
+ * @author Aadarsh Pandey
+ * @since 10th Feb 2026
+ */
+
+/**
+ * The main method to run the consistent hashing simulation.
+ */
 void main() {
 
     /* ================= SIMULATION CONFIG ================= */
@@ -55,18 +67,30 @@ void main() {
 
 /* ================= PRINT HELPERS ================= */
 
+/**
+ * Prints a formatted step title to the console.
+ * @param title The title of the step.
+ */
 void step(String title) {
     System.out.println("\n--------------------------------------------------");
     System.out.println("STEP → " + title);
     System.out.println("--------------------------------------------------");
 }
 
+/**
+ * Prints a formatted header title to the console.
+ * @param title The title of the header.
+ */
 void printHeader(String title) {
     System.out.println("\n==================================================");
     System.out.println(" " + title);
     System.out.println("==================================================");
 }
 
+/**
+ * Prints a formatted footer title to the console.
+ * @param title The title of the footer.
+ */
 void printFooter(String title) {
     System.out.println("\n==================================================");
     System.out.println(" " + title);
