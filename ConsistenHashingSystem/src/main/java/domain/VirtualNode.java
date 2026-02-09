@@ -1,4 +1,4 @@
 package domain;
 
-public class VirtualNode {
+public record VirtualNode(Server server, String name) {
 }

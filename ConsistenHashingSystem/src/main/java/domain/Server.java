@@ -1,4 +1,4 @@
 package domain;
 
-public class Server {
+public record Server(int id) {
 }

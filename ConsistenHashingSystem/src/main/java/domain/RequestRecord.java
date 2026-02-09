@@ -1,4 +1,4 @@
 package domain;
 
-public record RequestRecord() {
+public record RequestRecord(String requestKey, int serverId, long latencyNs, long timestamp) {
 }

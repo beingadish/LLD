@@ -1,3 +1,5 @@
+package system;
+
 import analytics.HotKeyDetector;
 import analytics.LatencyTracker;
 import analytics.RequestTracker;
@@ -17,28 +19,49 @@ public class ConsistentHashingSystem {
 
     private final HashRing ring;
     private final RequestRouter router;
+
     private final RequestTracker tracker = new RequestTracker();
     private final HotKeyDetector hotKeyDetector = new HotKeyDetector();
     private final LatencyTracker latencyTracker = new LatencyTracker();
 
     private final ConcurrentHashMap<Integer, AtomicInteger> serverLoad = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, Server> servers = new ConcurrentHashMap<>();
+
     private final AtomicInteger serverCounter = new AtomicInteger();
+    private volatile int virtualNodesPerServer = 3;
 
     public ConsistentHashingSystem() {
         this.ring = new HashRing(new SHA256Hash());
         this.router = new RequestRouter(ring);
     }
 
+    /* ================= CONFIG ================= */
+
+    public void setVirtualNodesPerServer(int count) {
+        if (count <= 0) throw new IllegalArgumentException();
+        this.virtualNodesPerServer = count;
+        rebuildRing();
+    }
+
+    /* ================= SERVERS ================= */
+
     public void addServer() {
         int id = serverCounter.getAndIncrement();
         Server server = new Server(id);
+
+        servers.put(id, server);
         serverLoad.put(id, new AtomicInteger());
 
-        int virtualNodesPerServer = 3;
-        for (int i = 0; i < virtualNodesPerServer; i++) {
-            ring.addVirtualNode(new VirtualNode(server, id + "_" + i));
-        }
+        addVirtualNodes(server);
     }
+
+    public void removeServer(int serverId) {
+        servers.remove(serverId);
+        serverLoad.remove(serverId);
+        ring.removeServer(serverId);
+    }
+
+    /* ================= ROUTING ================= */
 
     public int locate(String requestKey) {
         long start = System.nanoTime();
@@ -54,19 +77,19 @@ public class ConsistentHashingSystem {
 
         tracker.record(new RequestRecord(requestKey, serverId, latency, System.currentTimeMillis()));
 
-        System.out.println("Request " + requestKey + " hit " + node.name() + " -> Server " + serverId);
-
         return serverId;
     }
 
+    /* ================= STATS ================= */
+
     public void displayStats() {
         System.out.println("\n--- SYSTEM STATS ---");
-        serverLoad.forEach((k, v) -> System.out.println("Server " + k + ": " + v.get()));
+
+        serverLoad.forEach((k, v) -> System.out.println("Server " + k + " -> " + v.get()));
 
         System.out.println("Std Deviation: " + StatisticsCalculator.stdDeviation(serverLoad.values().stream().map(AtomicInteger::get).toList()));
 
         System.out.println("Avg Latency(ms): " + latencyTracker.averageLatencyMs());
-
         System.out.println("Hot Keys: " + hotKeyDetector.topHotKeys(3));
     }
 
@@ -78,8 +101,16 @@ public class ConsistentHashingSystem {
         tracker.replay().forEach(System.out::println);
     }
 
-    public void removeServer(int serverId) {
-        ring.removeServer(serverId);
-        serverLoad.remove(serverId);
+    /* ================= INTERNAL ================= */
+
+    private void addVirtualNodes(Server server) {
+        for (int i = 0; i < virtualNodesPerServer; i++) {
+            ring.addVirtualNode(new VirtualNode(server, server.id() + "_" + i));
+        }
+    }
+
+    private void rebuildRing() {
+        ring.clear();
+        servers.values().forEach(this::addVirtualNodes);
     }
 }
